@@ -7,10 +7,12 @@
   ineligible under the Public Procurement Act, 2021's own s.76(1)/
   s.78(1) citizen reservation and preference scale, whether Botswana
   Unified Revenue Service (BURS) Taxpayer Identification Number (TIN)
-  registration has been verified for a filing that requires it, or when
-  a draft stops being a draft and becomes a real-world IPMS tender
-  response, so this MUST be a separate system able to *reject* a
-  proposal and fall back to HOLD.
+  registration has been verified for a filing that requires it,
+  whether a foreign-owned engagement has actually acknowledged
+  Botswana Investment and Trade Centre (BITC) / Botswana One Stop
+  Service Centre (BOSSC) facilitation, or when a draft stops being a
+  draft and becomes a real-world IPMS tender response, so this MUST be
+  a separate system able to *reject* a proposal and fall back to HOLD.
 
   `:itonami.blueprint/governor` is `:market-entry-compliance-governor`
   (shared family keyword on blueprints).
@@ -21,13 +23,20 @@
   human sign-off'; 'a false or fabricated regulatory-requirement claim
   is a HARD hold') names exactly the checks below.
 
-  Six checks, in priority order, ALL HARD violations: a human
+  Seven checks, in priority order, ALL HARD violations: a human
   approver CANNOT override them. The confidence/actuation gate is
   SOFT: it asks a human to look (low confidence / actuation), and the
   human may approve -- but see `marketentry.phase`: for `:stake
   :actuation/draft-filing`/`:actuation/submit-filing` NO phase ever
   allows auto-commit either. Two independent layers agree that
   actuation is always a human call.
+
+  ⚠️ 'PPRA' below means, exclusively, Botswana's own Public Procurement
+  Regulatory Authority -- the identical acronym independently names
+  Kenya's and Pakistan's own, completely unrelated, national
+  procurement regulators. See `marketentry.facts` namespace docstring
+  for the full disambiguation and the `ppra-reference-disambiguated?`
+  regression guard.
 
     1. Spec-basis                  -- did the jurisdiction proposal cite
                                        an OFFICIAL source
@@ -37,7 +46,10 @@
                                        `:filing/submit`, has the
                                        jurisdiction actually been
                                        assessed with a full evidence
-                                       checklist on file?
+                                       checklist on file? (includes CIPA
+                                       Certificate of Incorporation and
+                                       Contractors' Register listing --
+                                       see `marketentry.facts`.)
     3. Reservation ineligible      -- for `:filing/submit`, when the
                                        engagement declares
                                        `:reserved-category? true`,
@@ -86,7 +98,30 @@
                                        Identification Number (TIN)
                                        registration process (see
                                        `marketentry.facts`).
-    6. Confidence floor / actuation
+    6. BITC/BOSSC facilitation
+       unacknowledged                -- for `:filing/submit`, when the
+                                       engagement declares
+                                       `:foreign-owned? true`,
+                                       INDEPENDENTLY check
+                                       `:bitc-facilitation-acknowledged?`.
+                                       CONDITIONAL on the engagement's
+                                       own ground truth -- a no-op for a
+                                       Motswana-owned engagement.
+                                       Grounded in the Botswana
+                                       Investment and Trade Centre
+                                       (BITC)'s own operational
+                                       description of the Botswana One
+                                       Stop Service Centre (BOSSC) (see
+                                       `marketentry.facts`). BITC/BOSSC
+                                       is a FACILITATION gate, never a
+                                       substitute for the CIPA
+                                       business-registration requirement
+                                       check 2 above already enforces
+                                       for every engagement, foreign or
+                                       domestic -- this check never
+                                       treats BITC as the registrar of
+                                       record.
+    7. Confidence floor / actuation
        gate                          -- LLM confidence below threshold,
                                        OR the op is `:filing/draft`/
                                        `:filing/submit` (REAL acts)
@@ -181,6 +216,31 @@
         [{:rule :tin-registration-unverified
           :detail (str subject " はBotswana Unified Revenue Service(Income Tax Act CAP 52:01)へのTIN登録確認を要するが未確認 -- 提出提案は進められない")}]))))
 
+(defn- bitc-facilitation-unacknowledged-violations
+  "For `:filing/submit`, when the engagement declares
+  `:foreign-owned? true`, INDEPENDENTLY check
+  `:bitc-facilitation-acknowledged?` -- CONDITIONAL on the engagement's
+  own ground truth, a no-op (never fires) for a domestic (non-foreign-
+  owned) engagement. Botswana Investment and Trade Centre (BITC)
+  operates the Botswana One Stop Service Centre (BOSSC), which
+  FACILITATES (bundles) company/business registration, trade/
+  industrial licenses, visas, work/residence permits, tax registration
+  and land access for a foreign investor -- BITC does NOT itself
+  register companies (the Companies and Intellectual Property
+  Authority, CIPA, remains the registrar of record -- see
+  `evidence-incomplete-violations` above, which already requires a
+  CIPA Certificate of Incorporation for every engagement, foreign or
+  domestic). This check only confirms a foreign-owned engagement has
+  actually gone through BITC/BOSSC facilitation; it never substitutes
+  for, and never relaxes, the CIPA registration requirement."
+  [{:keys [op subject]} st]
+  (when (= op :filing/submit)
+    (let [e (store/engagement st subject)]
+      (when (and (true? (:foreign-owned? e))
+                 (not (true? (:bitc-facilitation-acknowledged? e))))
+        [{:rule :bitc-facilitation-unacknowledged
+          :detail (str subject " は外国資本案件のためBotswana Investment and Trade Centre(BITC)のBotswana One Stop Service Centre(BOSSC)投資家向け窓口確認を要するが未確認 -- 提出提案は進められない(CIPA登録要件とは別)")}]))))
+
 (defn- already-drafted-violations
   "For `:filing/draft`, refuses to draft the SAME engagement twice."
   [{:keys [op subject]} st]
@@ -208,6 +268,7 @@
                            (reservation-ineligible-violations request st)
                            (engagement-fee-mismatch-violations request st)
                            (tin-registration-unverified-violations request st)
+                           (bitc-facilitation-unacknowledged-violations request st)
                            (already-drafted-violations request st)
                            (already-submitted-violations request st)))
         conf (:confidence proposal 0.0)

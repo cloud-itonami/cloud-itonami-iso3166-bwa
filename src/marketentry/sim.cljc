@@ -65,6 +65,14 @@
     (println "== filing/submit eng-5 (TIN registration unverified -> HARD hold) ==")
     (println (exec-op actor "t11" {:op :filing/submit :subject "eng-5"} operator))
 
+    (println "== jurisdiction/assess eng-7 (sets up BITC/BOSSC facilitation-unacknowledged) ==")
+    (println (exec-op actor "t15" {:op :jurisdiction/assess :subject "eng-7"} operator))
+    (println (approve! actor "t15"))
+    (println (exec-op actor "t15b" {:op :filing/draft :subject "eng-7"} operator))
+    (println (approve! actor "t15b"))
+    (println "== filing/submit eng-7 (foreign-owned, BITC/BOSSC facilitation not acknowledged -> HARD hold) ==")
+    (println (exec-op actor "t16" {:op :filing/submit :subject "eng-7"} operator))
+
     (println "== filing/draft eng-1 AGAIN (double-draft -> HARD hold) ==")
     (println (exec-op actor "t12" {:op :filing/draft :subject "eng-1"} operator))
 

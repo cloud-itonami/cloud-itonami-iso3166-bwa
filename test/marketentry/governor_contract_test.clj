@@ -100,6 +100,42 @@
       (is (some #{:tin-registration-unverified} (-> (store/ledger db) last :basis)))
       (is (empty? (store/submit-history db))))))
 
+(deftest bitc-facilitation-unacknowledged-is-held-for-foreign-owned-engagement
+  (testing "eng-7 is foreign-owned and has NOT acknowledged BITC/BOSSC facilitation -> HARD hold"
+    (let [[db actor] (fresh)
+          _ (assess! actor "t17pre" "eng-7")
+          _ (draft! actor "t17pre" "eng-7")
+          res (exec-op actor "t17" {:op :filing/submit :subject "eng-7"} operator)]
+      (is (= :hold (get-in res [:state :disposition])) "settles immediately, no interrupt")
+      (is (not= :interrupted (:status res)))
+      (is (some #{:bitc-facilitation-unacknowledged} (-> (store/ledger db) last :basis)))
+      (is (empty? (store/submit-history db))))))
+
+(deftest bitc-gate-only-fires-for-foreign-owned-engagements
+  (testing "eng-1 is domestic (:foreign-owned? false) and has NOT acknowledged BITC facilitation either (:bitc-facilitation-acknowledged? false in the seed data) -- the gate must never fire for a domestic engagement regardless of the acknowledgement flag"
+    (let [[db actor] (fresh)]
+      (is (false? (:foreign-owned? (store/engagement db "eng-1"))))
+      (is (false? (:bitc-facilitation-acknowledged? (store/engagement db "eng-1"))))
+      (let [_ (assess! actor "t18pre" "eng-1")
+            _ (draft! actor "t18pre" "eng-1")
+            r1 (exec-op actor "t18" {:op :filing/submit :subject "eng-1"} operator)]
+        (is (= :interrupted (:status r1)) "clean submit still escalates for human approval, never a BITC hold")
+        (let [r2 (approve! actor "t18")]
+          (is (= :commit (get-in r2 [:state :disposition])))
+          (is (true? (:submitted? (store/engagement db "eng-1"))))
+          (is (not (some #{:bitc-facilitation-unacknowledged} (-> (store/ledger db) last :basis))))))))
+  (testing "eng-6 IS foreign-owned but HAS acknowledged BITC/BOSSC facilitation -- the gate does not hold it either (the check is conditional on the ground truth being unmet, not merely on foreign ownership)"
+    (let [[db actor] (fresh)]
+      (is (true? (:foreign-owned? (store/engagement db "eng-6"))))
+      (is (true? (:bitc-facilitation-acknowledged? (store/engagement db "eng-6"))))
+      (let [_ (assess! actor "t19pre" "eng-6")
+            _ (draft! actor "t19pre" "eng-6")
+            r1 (exec-op actor "t19" {:op :filing/submit :subject "eng-6"} operator)]
+        (is (= :interrupted (:status r1)) "clean submit still escalates for human approval, never a BITC hold")
+        (let [r2 (approve! actor "t19")]
+          (is (= :commit (get-in r2 [:state :disposition])))
+          (is (not (some #{:bitc-facilitation-unacknowledged} (-> (store/ledger db) last :basis)))))))))
+
 (deftest non-reserved-category-is-not-gated-by-citizen-reservation-check
   (testing "eng-6 declares :reserved-category? false with 0% citizen ownership -- the flagship check never fires for it, because the Public Procurement Act, 2021 s.76(1) reservation only applies to a procurement that is itself within a reserved category"
     (let [[_db actor] (fresh)

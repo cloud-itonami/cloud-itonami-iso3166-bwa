@@ -14,9 +14,29 @@
   Internet Archive Wayback Machine (`web.archive.org`) -- never a
   secondary summary, never a third-party mirror):
 
-  - **Public procurement runs under the Public Procurement Regulatory
-    Authority (PPRA), the successor to the former Public Procurement
-    and Asset Disposal Board (PPADB).** This iteration fetched PPRA's
+  - **⚠️ DISAMBIGUATION (the single most important trap for this
+    jurisdiction): 'PPRA' is NOT unique to Botswana.** The identical
+    acronym 'PPRA' independently names Kenya's Public Procurement
+    Regulatory Authority and Pakistan's Public Procurement Regulatory
+    Authority -- two completely separate national bodies, under
+    completely separate governments and enabling statutes, with no
+    relationship to Botswana's PPRA whatsoever. Every 'PPRA' reference
+    in this catalog, in `marketentry.governor`, and in this repo's
+    docs means, specifically and only, **Botswana's own** Public
+    Procurement Regulatory Authority -- grounded in `ipms.ppadb.co.bw`
+    / `botswanalaws.com` / the Wayback-archived `ppadb.co.bw` captures
+    cited below, and NEVER `ppra.co.bw` (unreachable this session --
+    connection refused on both http/https -- and never independently
+    corroborated as Botswana's own domain). Downstream code and prose
+    surfacing this fact to a human MUST carry a Botswana-qualifying
+    token (\"Botswana\" or a `ppadb.co.bw`/`ipms.ppadb.co.bw` citation)
+    alongside the bare string \"PPRA\" -- `ppra-reference-disambiguated?`
+    below is a pure-function regression guard against silently
+    regressing to an unqualified 'PPRA' that a reader could mistake
+    for Kenya's or Pakistan's regulator.
+  - **Public procurement runs under Botswana's Public Procurement
+    Regulatory Authority (PPRA), the successor to the former Public
+    Procurement and Asset Disposal Board (PPADB).** This iteration fetched PPRA's
     own 'About PPADB' page (`www.ppadb.co.bw/Pages/AboutPPADB.aspx`,
     read via a Wayback Machine capture dated 2025-12-13 because the
     live domain refused every connection attempt from this session's
@@ -242,9 +262,9 @@
   discussion (a real but narrower external-company local-agent duty,
   not a general representative regime)."
   {"BWA" {:name "Republic of Botswana"
-          :owner-authority "Public Procurement Regulatory Authority (PPRA), successor to the Public Procurement and Asset Disposal Board (PPADB) -- IPMS (ipms.ppadb.co.bw) and the Public Procurement Act, 2021's own primary text"
-          :legal-basis "Public Procurement Act, 2021 (No. 24 of 2021), s.6 'Continuation of Authority', s.55 'National eProcurement System' -- own primary text, PPRA's own 'About Us'/'About PPADB' page confirms PPADB ceased to exist and PPRA came into being on 14 April 2022 (the PP Act's own commencement date)"
-          :national-spec "Integrated Procurement Management System (IPMS, ipms.ppadb.co.bw) -- PPRA's own implementation of the Public Procurement Act, 2021 s.55 National eProcurement System (registration of users/suppliers, tender preparation/advertising/submission, evaluation/award, contract signing, supplier management). Contractor/bidder registration via the Contractors' Register (Public Procurement Act, 2021 Part XIII, ss.91-103): licensed/incorporated under the Laws of Botswana and domiciled in Botswana (s.92(1)); registration valid five years (s.92(4))"
+          :owner-authority "Botswana's own Public Procurement Regulatory Authority (PPRA) -- NOT Kenya's or Pakistan's identically-acronymed, unrelated national regulators of the same name -- successor to (a continuation of, per the Act's own s.6) the Public Procurement and Asset Disposal Board (PPADB) -- IPMS (ipms.ppadb.co.bw) and the Public Procurement Act, 2021's own primary text"
+          :legal-basis "Public Procurement Act, 2021 (No. 24 of 2021), s.6 'Continuation of Authority', s.55 'National eProcurement System' -- own primary text, Botswana's PPRA's own 'About Us'/'About PPADB' page confirms PPADB ceased to exist and PPRA came into being on 14 April 2022 (the PP Act's own commencement date)"
+          :national-spec "Integrated Procurement Management System (IPMS, ipms.ppadb.co.bw) -- Botswana's PPRA's own implementation of the Public Procurement Act, 2021 s.55 National eProcurement System (registration of users/suppliers, tender preparation/advertising/submission, evaluation/award, contract signing, supplier management). Contractor/bidder registration via the Contractors' Register (Public Procurement Act, 2021 Part XIII, ss.91-103): licensed/incorporated under the Laws of Botswana and domiciled in Botswana (s.92(1)); registration valid five years (s.92(4))"
           :provenance "https://www.gov.bw/ ; https://ipms.ppadb.co.bw/ ; https://web.archive.org/web/20251213065005/http://www.ppadb.co.bw/Pages/AboutPPADB.aspx ; https://web.archive.org/web/20251213070010/http://www.ppadb.co.bw/Manuals%20%20Acts/Public%20Procurement%20Act,%202021.pdf"
           :required-evidence ["Companies and Intellectual Property Authority (CIPA) Certificate of Incorporation under the Companies Act, CAP 42:01"
                               "Botswana Unified Revenue Service (BURS) Taxpayer Identification Number (TIN) registration confirmation (Income Tax Act, CAP 52:01)"
@@ -257,13 +277,16 @@
           :business-registration-owner-authority "Companies and Intellectual Property Authority (CIPA) -- administers the Registrar of Companies function established under the Companies Act, CAP 42:01 s.10; CIPA's own 'About Us' page states CIPA itself was established by a separate Companies and Intellectual Property Authority Act, 2011 (not independently fetched by this iteration -- honest gap, see namespace docstring)"
           :business-registration-legal-basis "Companies Act, CAP 42:01 (own primary text): s.10 'There shall be a Registrar of Companies who shall be a public officer, and who shall, subject to the control of the Minister, be responsible for the administration of this Act'; Part II ss.20-23 (application for registration, registration, certificate of incorporation, conclusive evidence of compliance)"
           :business-registration-provenance "https://www.cipa.co.bw/about-us ; https://www.cipa.co.bw/cipa-acts ; https://www.cipa.co.bw/wp-content/uploads/2026/02/Companies-Act-CAP-42-01.pdf"
-          :citizen-reservation-owner-authority "Public Procurement Regulatory Authority (PPRA) -- Public Procurement Act, 2021's own Part XI administration"
-          :citizen-reservation-legal-basis "Public Procurement Act, 2021 (own primary text), s.76(1) 'Except as otherwise provided under this Act, all works, services and supplies procurement shall be reserved for a citizen or citizen contractor'; s.78(1) descending preference scale (joint ventures between citizen contractors; sole citizen contractors; joint ventures between citizen and local contractors with majority citizen shares; association arrangements between citizen subcontractors and local contractors); s.2 Interpretation '\"citizen contractor\" means a natural person or an incorporated company wholly owned and controlled by persons who are citizens of Botswana'. Corroborated in real operational practice by PPRA's own 'Guidelines for Application of Empowerment Schemes' (2019, CEEP/EDD/LPS ownership-tier price-preference margins)"
+          :citizen-reservation-owner-authority "Botswana's own Public Procurement Regulatory Authority (PPRA) -- Public Procurement Act, 2021's own Part XI administration"
+          :citizen-reservation-legal-basis "Public Procurement Act, 2021 (own primary text), s.76(1) 'Except as otherwise provided under this Act, all works, services and supplies procurement shall be reserved for a citizen or citizen contractor'; s.78(1) descending preference scale (joint ventures between citizen contractors; sole citizen contractors; joint ventures between citizen and local contractors with majority citizen shares; association arrangements between citizen subcontractors and local contractors); s.2 Interpretation '\"citizen contractor\" means a natural person or an incorporated company wholly owned and controlled by persons who are citizens of Botswana'. Corroborated in real operational practice by Botswana's PPRA's own 'Guidelines for Application of Empowerment Schemes' (2019, CEEP/EDD/LPS ownership-tier price-preference margins)"
           :citizen-reservation-preference-scale [:citizen-joint-venture
                                                   :sole-citizen-contractor
                                                   :majority-citizen-joint-venture
                                                   :citizen-subcontractor-association]
-          :citizen-reservation-provenance "https://web.archive.org/web/20251213070010/http://www.ppadb.co.bw/Manuals%20%20Acts/Public%20Procurement%20Act,%202021.pdf ; https://web.archive.org/web/20251213070010/http://www.ppadb.co.bw/Manuals%20%20Acts/GUIDELINES%20FOR%20APPLICATION%20OF%20EMPOWERMENT%20SCHEMES%20final%20Version%2001-%2020092019%20%281%29.pdf"}
+          :citizen-reservation-provenance "https://web.archive.org/web/20251213070010/http://www.ppadb.co.bw/Manuals%20%20Acts/Public%20Procurement%20Act,%202021.pdf ; https://web.archive.org/web/20251213070010/http://www.ppadb.co.bw/Manuals%20%20Acts/GUIDELINES%20FOR%20APPLICATION%20OF%20EMPOWERMENT%20SCHEMES%20final%20Version%2001-%2020092019%20%281%29.pdf"
+          :bitc-facilitation-owner-authority "Botswana Investment and Trade Centre (BITC) -- operates the Botswana One Stop Service Centre (BOSSC), a foreign-investor FACILITATION gate. BITC does NOT itself register companies; the Companies and Intellectual Property Authority (CIPA, see :business-registration-* above) remains the registrar of record for every engagement, foreign or domestic -- BOSSC only bundles/expedites access to CIPA registration, trade/industrial licenses, visas, work/residence permits, tax registration and land access for a foreign investor"
+          :bitc-facilitation-legal-basis "This iteration directly fetched BITC's own site (bitc.co.bw, HTTP 200, live) and confirmed, in BITC's own words: 'Botswana One Stop Service Centre (BOSSC) is an investment facilitation center, within BITC, which houses relevant government agencies as a single cohesive structure' that 'provides prompt, efficient, and transparent services to investors' and 'assists investors to acquire government authorizations within the shortest possible time.' This iteration did NOT independently locate BOSSC's own establishing statute/regulation primary text (an honest, explicit gap -- BITC's own site did not surface one on this pass); this fact is grounded in BITC's own operational self-description, not a numbered Act"
+          :bitc-facilitation-provenance "https://www.bitc.co.bw/"}
    "USA" {:name "United States"
           :owner-authority "U.S. General Services Administration (GSA) / SAM.gov"
           :legal-basis "Federal Acquisition Regulation (FAR); System for Award Management"
@@ -369,3 +392,46 @@
                        :citizen-reservation-legal-basis
                        :citizen-reservation-preference-scale
                        :citizen-reservation-provenance]))))
+
+(defn bitc-facilitation-spec-basis
+  "The jurisdiction's foreign-investor facilitation-gate regime, or nil.
+  For BWA this is the Botswana Investment and Trade Centre (BITC) /
+  Botswana One Stop Service Centre (BOSSC) -- a FACILITATION gate for
+  foreign-owned engagements, distinct from (and never a substitute
+  for) the CIPA business-registration requirement every engagement,
+  foreign or domestic, must independently satisfy -- see namespace
+  docstring and `business-registration-spec-basis`."
+  [iso3]
+  (when-let [sb (spec-basis iso3)]
+    (when (:bitc-facilitation-owner-authority sb)
+      (select-keys sb [:bitc-facilitation-owner-authority
+                       :bitc-facilitation-legal-basis
+                       :bitc-facilitation-provenance]))))
+
+(defn ppra-reference-disambiguated?
+  "Regression guard against the single most important fabrication trap
+  in this jurisdiction's catalog: 'PPRA' is independently used by
+  Kenya's and Pakistan's own, completely unrelated, national
+  procurement regulators. Any citation string that mentions the bare
+  substring \"PPRA\" MUST also carry an unambiguous Botswana-qualifying
+  token (\"Botswana\" or a `ppadb.co.bw` domain) -- returns false for a
+  'PPRA' mention with no such qualifier (the exact shape of the trap),
+  true when `s` doesn't mention PPRA at all or when it does so with a
+  qualifier present."
+  [s]
+  (if (and s (re-find #"PPRA" s))
+    (boolean (re-find #"(?i)botswana|ppadb\.co\.bw" s))
+    true))
+
+(defn ppra-references-in-catalog-disambiguated?
+  "Walks every string value in `catalog` and confirms every 'PPRA'
+  mention is Botswana-qualified per `ppra-reference-disambiguated?` --
+  the executable form of this namespace docstring's disambiguation
+  warning. Used by `marketentry.facts-test` as a whole-catalog
+  regression guard, not just a single-field spot check."
+  []
+  (every? ppra-reference-disambiguated?
+          (->> (vals catalog)
+               (mapcat vals)
+               (mapcat (fn [v] (if (sequential? v) v [v])))
+               (filter string?))))

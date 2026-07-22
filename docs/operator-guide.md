@@ -3,13 +3,21 @@
 ## First Deployment
 
 1. Confirm the client's incorporation/legal-entity status is complete
-   (route to `cloud-itonami-M6910` or local counsel first if not).
+   (route to `cloud-itonami-M6910` or local counsel first if not) --
+   registered with the Companies and Intellectual Property Authority
+   (CIPA), never with BITC (BITC facilitates, it does not register).
 2. Register the client's intake: business type, target public function,
-   prior filing history in Botswana if any.
+   prior filing history in Botswana if any, and whether the client is
+   foreign-owned (triggers the BITC/BOSSC facilitation-acknowledgement
+   check).
 3. Run the advisor in read-only mode against IPMS (ipms.ppadb.co.bw),
-   the PPRA-operated supplier registration gateway.
+   the supplier-registration gateway operated by Botswana's own PPRA
+   (see README's PPRA disambiguation note -- never confuse this with
+   Kenya's or Pakistan's identically-acronymed regulators).
 4. Compare the checklist against the client's current documentation
-   (CIPA registration, BURS Tax Clearance Certificate).
+   (CIPA Certificate of Incorporation, BURS TIN registration
+   confirmation, Contractors' Register listing, and -- for a
+   foreign-owned client -- BITC/BOSSC facilitation acknowledgement).
 5. Enable gated filing-draft assistance once the Market-Entry Compliance
    Governor contract is trusted; actual submission always requires human
    sign-off.

@@ -9,7 +9,34 @@
     (is (seq (:required-evidence sb)))
     (is (some? (facts/corporate-number-spec-basis "BWA")))
     (is (some? (facts/business-registration-spec-basis "BWA")))
-    (is (some? (facts/citizen-reservation-spec-basis "BWA")))))
+    (is (some? (facts/citizen-reservation-spec-basis "BWA")))
+    (is (some? (facts/bitc-facilitation-spec-basis "BWA")))))
+
+(deftest bwa-ppra-references-are-disambiguated-from-kenya-and-pakistan
+  (testing "the single most important trap for this jurisdiction: 'PPRA' independently names Kenya's and Pakistan's own, unrelated, national procurement regulators -- every catalog citation mentioning PPRA must be Botswana-qualified"
+    (is (true? (facts/ppra-references-in-catalog-disambiguated?)))
+    (is (false? (facts/ppra-reference-disambiguated? "PPRA handles procurement"))
+        "a bare, unqualified 'PPRA' mention must be rejected by the guard -- this IS the trap")
+    (is (true? (facts/ppra-reference-disambiguated? "Botswana's PPRA handles procurement")))
+    (is (true? (facts/ppra-reference-disambiguated? "see ipms.ppadb.co.bw (PPRA's own portal)")))
+    (is (true? (facts/ppra-reference-disambiguated? "no relevant-acronym mention here at all")))
+    (is (some? (:owner-authority (facts/spec-basis "BWA"))))
+    (is (re-find #"(?i)Botswana" (:owner-authority (facts/spec-basis "BWA")))
+        "the top-level owner-authority citation itself must carry the Botswana qualifier")
+    (is (re-find #"(?i)NOT Kenya|NOT.*Pakistan|Kenya's|Pakistan's" (:owner-authority (facts/spec-basis "BWA")))
+        "the catalog's own text should name the disambiguation, not just imply it")))
+
+(deftest bwa-bitc-facilitation-is-a-facilitation-gate-not-a-registrar
+  (testing "BITC/BOSSC facilitates; CIPA remains the registrar of record -- BITC must never be modeled as the registrar"
+    (let [bitc (facts/bitc-facilitation-spec-basis "BWA")
+          reg  (facts/business-registration-spec-basis "BWA")]
+      (is (some? bitc))
+      (is (some? reg))
+      (is (not= (:bitc-facilitation-owner-authority bitc)
+                (:business-registration-owner-authority reg))
+          "BITC and CIPA are different bodies with different roles")
+      (is (re-find #"(?i)CIPA" (:bitc-facilitation-owner-authority bitc))
+          "the BITC fact itself must acknowledge CIPA remains the registrar of record"))))
 
 (deftest bwa-rep-spec-basis-is-honest-nil
   (testing "BWA's rep-spec-basis is nil -- this iteration found a real external-company local-agent duty (Companies Act s.345(e)) but it is scoped narrower than a general market-entry representative regime"

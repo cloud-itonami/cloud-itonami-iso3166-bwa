@@ -7,4 +7,42 @@
  :itonami.blueprint/governor :market-entry-compliance-governor
  :itonami.blueprint/robotics false
  :itonami.blueprint/required-technologies [:identity :forms :dmn :bpmn :audit-ledger]
- :itonami.blueprint/status :public-oss}
+ :itonami.blueprint/status :public-oss
+ :itonami.blueprint/maturity :implemented
+ :itonami.blueprint/implemented-slice
+ "MarketEntry-LLM ⊣ Market-Entry Compliance Governor, a REAL compiled
+ `kotoba-lang/langgraph` StateGraph (`:intake -> :advise -> :govern ->
+ :decide -+-> :commit / :request-approval -> :commit / :hold`), with a
+ real `interrupt-before #{:request-approval}` + in-memory checkpointer
+ pausing every `:jurisdiction/assess`/`:filing/draft`/`:filing/submit`
+ for human sign-off, and both `:commit` and `:hold` durably appending
+ to the audit ledger. `marketentry.facts` catalogs the Republic of
+ Botswana (BWA) market-entry surface, grounded in primary-text fetches
+ of the Public Procurement Act, 2021 (No. 24 of 2021), the Companies
+ Act (CAP 42:01, CIPA), the Botswana Unified Revenue Service Act (CAP
+ 53:03) and Income Tax Act (CAP 52:01), and BITC's own site -- and
+ EXPLICITLY disambiguates Botswana's own Public Procurement Regulatory
+ Authority (PPRA, the s.6 continuation of the former PPADB) from
+ Kenya's and Pakistan's identically-acronymed, unrelated national
+ regulators of the same name (`marketentry.facts/ppra-reference-
+ disambiguated?` is a regression guard against this exact
+ fabrication trap). Seven governor checks (spec-basis ·
+ evidence-incomplete (CIPA registration + BURS TIN + Contractors'
+ Register) · reservation-ineligible against the Public Procurement
+ Act, 2021 s.76(1)/s.78(1) citizen-reservation preference scale, the
+ flagship ORDERED TIER-CLASSIFICATION check shape for this vertical ·
+ engagement-fee-mismatch · TIN-registration-unverified (BURS) ·
+ BITC/BOSSC facilitation-unacknowledged, entity-scope-gated to a
+ foreign-owned engagement, a FACILITATION gate that never substitutes
+ for the CIPA registration check · already-drafted/already-submitted
+ double-actuation guards), all HARD and unoverridable;
+ `:filing/draft`/`:filing/submit` are permanently absent from every
+ phase's `:auto` set (never auto-commit, at any phase, by construction
+ -- two independent layers, `marketentry.governor`'s high-stakes gate
+ and `marketentry.phase`'s phase table, agree). Store gained a
+ `DatomicStore` via `kotoba-lang/langchain-store` (no hand-rolled
+ EDN-blob codec), proven ≡ `MemStore` by a store-contract test. 30+
+ tests across governor contract (including a dedicated PPRA-
+ disambiguation regression test and a BITC-gate-fires-only-for-
+ foreign-owned-engagements test), phase invariants, store parity,
+ registry conformance and facts coverage, clj-kondo 0 errors."}
