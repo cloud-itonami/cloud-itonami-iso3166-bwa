@@ -38,8 +38,11 @@
     claim this iteration did not cross-check against that Act's own
     primary text).
   - **The Public Procurement Act, 2021 (No. 24 of 2021)** -- downloaded
-    in full as a PDF directly from the Public Procurement Regulatory
-    Authority's (PPRA, formerly PPADB) own official site
+    in full as a PDF directly from Botswana's own Public Procurement
+    Regulatory Authority's (PPRA, formerly PPADB -- NOT Kenya's or
+    Pakistan's identically-acronymed, unrelated national regulators of
+    the same name; see `marketentry.facts` namespace docstring for the
+    full disambiguation) own official site
     (`www.ppadb.co.bw/Manuals  Acts/Public Procurement Act, 2021.pdf`,
     read via a Wayback Machine capture because the live domain refused
     every connection attempt from this session's network) and read via
@@ -126,7 +129,7 @@
      :statute/title "The Public Procurement Act, 2021 (No. 24 of 2021)"
      :statute/jurisdiction "BWA"
      :statute/kind :law
-     :statute/law-number "s.6 'Continuation of Authority' (Public Procurement Regulatory Authority, PPRA, continues the former PPADB); s.55 'National eProcurement System'; Part XI (ss.72-81) 'Reservation and Preferential Treatment', s.76(1) default citizen reservation, s.78(1) descending preference scale; Part XIII (ss.91-103) 'Registration of Contractors'. Came into effect 14 April 2022 (own commencement / PPRA's own 'About Us' page)"
+     :statute/law-number "s.6 'Continuation of Authority' (Botswana's own Public Procurement Regulatory Authority, PPRA -- not Kenya's or Pakistan's identically-acronymed regulators -- continues the former PPADB); s.55 'National eProcurement System'; Part XI (ss.72-81) 'Reservation and Preferential Treatment', s.76(1) default citizen reservation, s.78(1) descending preference scale; Part XIII (ss.91-103) 'Registration of Contractors'. Came into effect 14 April 2022 (own commencement / Botswana's PPRA's own 'About Us' page)"
      :statute/url "https://web.archive.org/web/20251213070010/http://www.ppadb.co.bw/Manuals%20%20Acts/Public%20Procurement%20Act,%202021.pdf"
      :statute/url-provenance :ppra-official-site-wayback-capture
      :statute/enacted-date "2021-11-26"

@@ -88,6 +88,8 @@
                    (str "tin-registered?=" (:tin-registered? e)
                         " citizen-ownership-pct=" (:citizen-ownership-pct e)
                         " joint-venture?=" (:joint-venture? e)
+                        " foreign-owned?=" (:foreign-owned? e)
+                        " bitc-facilitation-acknowledged?=" (:bitc-facilitation-acknowledged? e)
                         " claimed-fee=" (:claimed-fee e))
                    "engagementが見つかりません")
      :cites      (if e [subject] [])
@@ -96,7 +98,9 @@
      :stake      :actuation/submit-filing
      :confidence (if (and e
                           (or (not (:requires-tin-registration? e))
-                              (:tin-registered? e)))
+                              (:tin-registered? e))
+                          (or (not (:foreign-owned? e))
+                              (:bitc-facilitation-acknowledged? e)))
                    0.9 0.3)}))
 
 (defprotocol Advisor

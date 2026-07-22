@@ -23,13 +23,25 @@
 
 - registration walkthrough for the Integrated Procurement Management
   System (IPMS, ipms.ppadb.co.bw), the online supplier-registration
-  gateway operated by the Public Procurement Regulatory Authority (PPRA,
-  formerly PPADB, transitioned in 2022)
+  gateway operated by Botswana's own Public Procurement Regulatory
+  Authority (PPRA -- NOT Kenya's or Pakistan's identically-acronymed,
+  unrelated regulators of the same name; the SAME legal body as the
+  former PPADB, simply renamed under the Public Procurement Act, 2021,
+  No. 24 of 2021, s.6 "Continuation of Authority", commenced 14 April
+  2022 -- not a newly-created organization)
 - business/tax registration checklist: registration with the Companies
-  and Intellectual Property Authority (CIPA) plus a valid Tax Clearance
-  Certificate from the Botswana Unified Revenue Service (BURS)
+  and Intellectual Property Authority (CIPA) plus a Taxpayer
+  Identification Number (TIN) from the Botswana Unified Revenue
+  Service (BURS)
+- foreign-investor facilitation walkthrough: Botswana Investment and
+  Trade Centre (BITC)'s Botswana One Stop Service Centre (BOSSC), which
+  bundles access to company/business registration, trade/industrial
+  licenses, visas, work/residence permits, tax registration and land
+  access for a foreign-owned engagement -- BITC FACILITATES; CIPA
+  remains the registrar of record
 - local-content / preferential-procurement navigation: Botswanan
-  public-procurement preference provisions for local suppliers on
+  public-procurement citizen-reservation and preference provisions
+  (Public Procurement Act, 2021 s.76(1)/s.78(1)) for local suppliers on
   qualifying tenders
 - ongoing regulatory-change monitoring subscription
 - compliance-audit export package for the client's own records
@@ -54,6 +66,16 @@
   routes to Botswanan-licensed counsel or a registered agent
 - every requirement cites the official portal or regulation, never
   invented
+- **PPRA disambiguation**: any regulatory-requirement claim naming
+  "PPRA" must be Botswana-qualified -- the identical acronym
+  independently names Kenya's and Pakistan's own, unrelated, national
+  procurement regulators, and citing a bare "PPRA" as if it were
+  self-evidently Botswana's own is treated as the same class of
+  fabrication risk as inventing a requirement outright
+- BITC/Botswana One Stop Service Centre (BOSSC) is modeled strictly as
+  a foreign-investor facilitation gate, never as the registrar of
+  record -- CIPA registration is required for every engagement
+  regardless of whether BITC facilitation was used
 
 ## Boundary with adjacent actors (read before forking)
 

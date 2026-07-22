@@ -18,11 +18,15 @@
   double-actuation-guard booleans (`:drafted?`/`:submitted?`, never a
   `:status` value).
 
-  The ledger stays append-only on every backend."
-  (:require #?(:clj  [clojure.edn :as edn]
-               :cljs [cljs.reader :as edn])
-            [marketentry.registry :as registry]
-            [langchain.db :as d]))
+  The ledger stays append-only on every backend. `DatomicStore` uses
+  `kotoba-lang/langchain-store` (`langchain-store.core`) for the
+  EDN-blob codec and seq-keyed event-log read/append -- NOT a
+  hand-rolled `enc`/`dec*` two-liner (ADR-2607141600: that exact
+  two-liner is already duplicated verbatim across ~190 cloud-itonami
+  actor stores; this repo does not add a 191st copy)."
+  (:require [marketentry.registry :as registry]
+            [langchain.db :as d]
+            [langchain-store.core :as ls]))
 
 (defprotocol Store
   (engagement [s id])
@@ -53,7 +57,12 @@
   structure ineligible under a reserved category?);
   `:requires-tin-registration?` / `:tin-registered?` are ground truth
   for the conditional Botswana Unified Revenue Service (BURS) Taxpayer
-  Identification Number (TIN) check."
+  Identification Number (TIN) check. `:foreign-owned?` /
+  `:bitc-facilitation-acknowledged?` are ground truth for the
+  conditional Botswana Investment and Trade Centre (BITC) / Botswana
+  One Stop Service Centre (BOSSC) facilitation-gate check -- a no-op
+  for a domestic (non-foreign-owned) engagement, see
+  `marketentry.governor/bitc-facilitation-unacknowledged-violations`."
   []
   {:engagements
    {"eng-1" {:id "eng-1" :operator "Gaborone Trading House (Pty) Ltd" :procurement-channel "IPMS (ipms.ppadb.co.bw) tender notice"
@@ -62,6 +71,7 @@
              :reserved-category? true :reservation-exempt? false
              :citizen-ownership-pct 100 :joint-venture? false :citizen-subcontractor-association? false
              :requires-tin-registration? true :tin-registered? true
+             :foreign-owned? false :bitc-facilitation-acknowledged? false
              :drafted? false :submitted? false
              :jurisdiction "BWA" :status :intake}
     "eng-2" {:id "eng-2" :operator "Atlantis LLC" :procurement-channel "IPMS (ipms.ppadb.co.bw) tender notice"
@@ -70,6 +80,7 @@
              :reserved-category? true :reservation-exempt? false
              :citizen-ownership-pct 100 :joint-venture? false :citizen-subcontractor-association? false
              :requires-tin-registration? true :tin-registered? true
+             :foreign-owned? false :bitc-facilitation-acknowledged? false
              :drafted? false :submitted? false
              :jurisdiction "ATL" :status :intake}
     "eng-3" {:id "eng-3" :operator "Francistown Ventures (Pty) Ltd" :procurement-channel "IPMS (ipms.ppadb.co.bw) tender notice"
@@ -78,6 +89,7 @@
              :reserved-category? true :reservation-exempt? false
              :citizen-ownership-pct 100 :joint-venture? false :citizen-subcontractor-association? false
              :requires-tin-registration? true :tin-registered? true
+             :foreign-owned? false :bitc-facilitation-acknowledged? false
              :drafted? false :submitted? false
              :jurisdiction "BWA" :status :intake}
     "eng-4" {:id "eng-4" :operator "Offshore Builders Ltd" :procurement-channel "IPMS (ipms.ppadb.co.bw) tender notice"
@@ -86,6 +98,7 @@
              :reserved-category? true :reservation-exempt? false
              :citizen-ownership-pct 0 :joint-venture? false :citizen-subcontractor-association? false
              :requires-tin-registration? true :tin-registered? true
+             :foreign-owned? true :bitc-facilitation-acknowledged? true
              :drafted? false :submitted? false
              :jurisdiction "BWA" :status :intake}
     "eng-5" {:id "eng-5" :operator "Maun Logistics (Pty) Ltd" :procurement-channel "IPMS (ipms.ppadb.co.bw) tender notice"
@@ -94,6 +107,7 @@
              :reserved-category? true :reservation-exempt? false
              :citizen-ownership-pct 100 :joint-venture? false :citizen-subcontractor-association? false
              :requires-tin-registration? true :tin-registered? false
+             :foreign-owned? false :bitc-facilitation-acknowledged? false
              :drafted? false :submitted? false
              :jurisdiction "BWA" :status :intake}
     "eng-6" {:id "eng-6" :operator "Selebi-Phikwe Foreign Supplies Ltd" :procurement-channel "IPMS (ipms.ppadb.co.bw) tender notice"
@@ -102,6 +116,16 @@
              :reserved-category? false :reservation-exempt? false
              :citizen-ownership-pct 0 :joint-venture? false :citizen-subcontractor-association? false
              :requires-tin-registration? true :tin-registered? true
+             :foreign-owned? true :bitc-facilitation-acknowledged? true
+             :drafted? false :submitted? false
+             :jurisdiction "BWA" :status :intake}
+    "eng-7" {:id "eng-7" :operator "Kalahari Frontier Resources Ltd" :procurement-channel "IPMS (ipms.ppadb.co.bw) tender notice"
+             :base-fee 500000 :monthly-rate 30000 :monitoring-months 12
+             :claimed-fee 860000.0
+             :reserved-category? false :reservation-exempt? false
+             :citizen-ownership-pct 0 :joint-venture? false :citizen-subcontractor-association? false
+             :requires-tin-registration? true :tin-registered? true
+             :foreign-owned? true :bitc-facilitation-acknowledged? false
              :drafted? false :submitted? false
              :jurisdiction "BWA" :status :intake}}})
 
@@ -192,13 +216,11 @@
    :draft-sequence/jurisdiction     {:db/unique :db.unique/identity}
    :submit-sequence/jurisdiction    {:db/unique :db.unique/identity}})
 
-(defn- enc [v] (pr-str v))
-(defn- dec* [s] (when s (edn/read-string s)))
-
 (defn- engagement->tx [{:keys [id operator procurement-channel base-fee monthly-rate monitoring-months claimed-fee
                                reserved-category? reservation-exempt? citizen-ownership-pct joint-venture?
                                citizen-subcontractor-association?
                                requires-tin-registration? tin-registered?
+                               foreign-owned? bitc-facilitation-acknowledged?
                                drafted? submitted?
                                jurisdiction status draft-number submit-number]}]
   (cond-> {:engagement/id id}
@@ -215,6 +237,8 @@
     (some? citizen-subcontractor-association?)     (assoc :engagement/citizen-subcontractor-association? citizen-subcontractor-association?)
     (some? requires-tin-registration?)             (assoc :engagement/requires-tin-registration? requires-tin-registration?)
     (some? tin-registered?)                        (assoc :engagement/tin-registered? tin-registered?)
+    (some? foreign-owned?)                         (assoc :engagement/foreign-owned? foreign-owned?)
+    (some? bitc-facilitation-acknowledged?)        (assoc :engagement/bitc-facilitation-acknowledged? bitc-facilitation-acknowledged?)
     (some? drafted?)                               (assoc :engagement/drafted? drafted?)
     (some? submitted?)                             (assoc :engagement/submitted? submitted?)
     jurisdiction                                   (assoc :engagement/jurisdiction jurisdiction)
@@ -228,6 +252,7 @@
    :engagement/reserved-category? :engagement/reservation-exempt? :engagement/citizen-ownership-pct
    :engagement/joint-venture? :engagement/citizen-subcontractor-association?
    :engagement/requires-tin-registration? :engagement/tin-registered?
+   :engagement/foreign-owned? :engagement/bitc-facilitation-acknowledged?
    :engagement/drafted? :engagement/submitted?
    :engagement/jurisdiction :engagement/status :engagement/draft-number :engagement/submit-number])
 
@@ -243,6 +268,8 @@
      :citizen-subcontractor-association? (boolean (:engagement/citizen-subcontractor-association? m))
      :requires-tin-registration? (boolean (:engagement/requires-tin-registration? m))
      :tin-registered? (boolean (:engagement/tin-registered? m))
+     :foreign-owned? (boolean (:engagement/foreign-owned? m))
+     :bitc-facilitation-acknowledged? (boolean (:engagement/bitc-facilitation-acknowledged? m))
      :drafted? (boolean (:engagement/drafted? m)) :submitted? (boolean (:engagement/submitted? m))
      :jurisdiction (:engagement/jurisdiction m) :status (:engagement/status m)
      :draft-number (:engagement/draft-number m) :submit-number (:engagement/submit-number m)}))
@@ -256,21 +283,12 @@
          (map #(pull->engagement (d/pull (d/db conn) engagement-pull [:engagement/id %])))
          (sort-by :id)))
   (assessment-of [_ engagement-id]
-    (dec* (d/q '[:find ?p . :in $ ?eid
-                :where [?a :assessment/engagement-id ?eid] [?a :assessment/payload ?p]]
-              (d/db conn) engagement-id)))
-  (ledger [_]
-    (->> (d/q '[:find ?s ?f :where [?e :ledger/seq ?s] [?e :ledger/fact ?f]] (d/db conn))
-         (sort-by first)
-         (mapv (comp dec* second))))
-  (draft-history [_]
-    (->> (d/q '[:find ?s ?r :where [?e :draft-record/seq ?s] [?e :draft-record/record ?r]] (d/db conn))
-         (sort-by first)
-         (mapv (comp dec* second))))
-  (submit-history [_]
-    (->> (d/q '[:find ?s ?r :where [?e :submit-record/seq ?s] [?e :submit-record/record ?r]] (d/db conn))
-         (sort-by first)
-         (mapv (comp dec* second))))
+    (ls/dec* (d/q '[:find ?p . :in $ ?eid
+                   :where [?a :assessment/engagement-id ?eid] [?a :assessment/payload ?p]]
+                 (d/db conn) engagement-id)))
+  (ledger [_] (ls/read-stream conn :ledger/seq :ledger/fact))
+  (draft-history [_] (ls/read-stream conn :draft-record/seq :draft-record/record))
+  (submit-history [_] (ls/read-stream conn :submit-record/seq :submit-record/record))
   (next-draft-sequence [_ jurisdiction]
     (or (d/q '[:find ?n . :in $ ?j
               :where [?e :draft-sequence/jurisdiction ?j] [?e :draft-sequence/next ?n]]
@@ -291,7 +309,7 @@
       (d/transact! conn [(engagement->tx value)])
 
       :assessment/set
-      (d/transact! conn [{:assessment/engagement-id (first path) :assessment/payload (enc payload)}])
+      (d/transact! conn [{:assessment/engagement-id (first path) :assessment/payload (ls/enc payload)}])
 
       :engagement/mark-drafted
       (let [engagement-id (first path)
@@ -301,7 +319,7 @@
         (d/transact! conn
                      [(engagement->tx (assoc engagement-patch :id engagement-id))
                       {:draft-sequence/jurisdiction jurisdiction :draft-sequence/next next-n}
-                      {:draft-record/seq (count (draft-history s)) :draft-record/record (enc (get result "record"))}])
+                      {:draft-record/seq (count (draft-history s)) :draft-record/record (ls/enc (get result "record"))}])
         result)
 
       :engagement/mark-submitted
@@ -312,12 +330,12 @@
         (d/transact! conn
                      [(engagement->tx (assoc engagement-patch :id engagement-id))
                       {:submit-sequence/jurisdiction jurisdiction :submit-sequence/next next-n}
-                      {:submit-record/seq (count (submit-history s)) :submit-record/record (enc (get result "record"))}])
+                      {:submit-record/seq (count (submit-history s)) :submit-record/record (ls/enc (get result "record"))}])
         result)
       nil)
     s)
   (append-ledger! [s fact]
-    (d/transact! conn [{:ledger/seq (count (ledger s)) :ledger/fact (enc fact)}])
+    (ls/append-blob! conn :ledger/seq :ledger/fact (count (ledger s)) fact)
     fact)
   (with-engagements [s engagements]
     (when (seq engagements) (d/transact! conn (mapv engagement->tx (vals engagements)))) s))

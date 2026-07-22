@@ -13,6 +13,7 @@
                                    :citizen-ownership-pct 100 :joint-venture? false
                                    :citizen-subcontractor-association? false
                                    :requires-tin-registration? true :tin-registered? true
+                                   :foreign-owned? true :bitc-facilitation-acknowledged? true
                                    :drafted? false :submitted? false :status :intake}})
   (store/commit-record! s {:effect :assessment/set
                            :path ["eng-x"]
@@ -39,6 +40,8 @@
         m (exercise mem*)
         d (exercise dat*)]
     (is (= (:operator (:engagement m)) (:operator (:engagement d))))
+    (is (= (:foreign-owned? (:engagement m)) (:foreign-owned? (:engagement d))))
+    (is (= (:bitc-facilitation-acknowledged? (:engagement m)) (:bitc-facilitation-acknowledged? (:engagement d))))
     (is (true? (:drafted? m)) (true? (:drafted? d)))
     (is (true? (:submitted? m)) (true? (:submitted? d)))
     (is (= 1 (count (:drafts m))) (= 1 (count (:drafts d))))
